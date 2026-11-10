@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#123d32">
+<title>Escola de Voz CCB</title>
+<style>
+:root{color-scheme:dark;--bg:#102a25;--panel:#183b33;--gold:#e2c477;--muted:#b8c9c2}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#102a25,#071a17);color:#fff;font:16px system-ui,sans-serif}
+main{max-width:720px;margin:auto;padding:22px 16px 40px}
+header{text-align:center;padding:20px 8px 24px}h1{margin:8px 0;color:var(--gold);font-size:30px}p{color:var(--muted);line-height:1.5}
+.card{background:var(--panel);border:1px solid #31584d;border-radius:18px;padding:18px;margin:14px 0}
+button{border:0;border-radius:12px;padding:13px 16px;font-weight:700;font-size:15px;background:var(--gold);color:#172820;margin:5px 5px 5px 0}
+button.secondary{background:#31584d;color:#fff}.big{font-size:42px;font-weight:800;color:var(--gold);text-align:center;margin:10px}
+.center{text-align:center}.small{font-size:13px}.status{padding:10px;border-radius:10px;background:#102a25;color:var(--muted);margin-top:10px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.note{background:#102a25;border-radius:10px;padding:10px;text-align:center}
+button:disabled{opacity:.5}
+</style>
+</head>
+<body><main>
+<header><div>🎼</div><h1>Escola de Voz CCB</h1><p>Seu espaço de prática vocal — Hinário 5</p></header>
+<section class="card">
+<h2>🎙️ Teste do microfone</h2>
+<p>Toque em “Ativar microfone” e permita o acesso quando o navegador solicitar. Cante uma nota confortável, sem forçar a voz.</p>
+<div class="center"><button id="start">Ativar microfone</button><button id="stop" class="secondary" disabled>Parar</button></div>
+<div class="big" id="note">—</div><div class="center" id="freq">Aguardando microfone</div>
+<div class="status" id="status" role="status">O teste do microfone precisa ser aberto em uma página HTTPS ou localhost. Abrir o arquivo diretamente pode bloquear o microfone.</div>
+</section>
+<section class="card">
+<h2>🎹 Notas de referência</h2>
+<p>Toque em uma nota para ouvir um som de referência. Estes sons são gerados pelo aplicativo.</p>
+<div class="grid" id="tones"></div>
+</section>
+<section class="card">
+<h2>🎯 Próximas funções</h2>
+<p>Estamos construindo por etapas:</p>
+<ul><li>Exercícios vocais guiados</li><li>Treinamento de soprano, contralto, tenor e baixo</li><li>Análise de afinação e estabilidade</li><li>Partituras e hinos com materiais autorizados</li><li>Acompanhamento da evolução</li></ul>
+<p class="small">Esta é uma versão experimental. A leitura de uma nota pelo microfone é apenas uma estimativa inicial; ainda não avalia ritmo, técnica vocal ou desempenho completo.</p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);let ctx=null,stream=null,raf=null,analyser=null;
+const names=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+function freqName(f){let n=Math.round(69+12*Math.log2(f/440));return names[(n%12+12)%12]+(Math.floor(n/12)-1)}
+function detect(buf,sr){let rms=0;for(let i=0;i<buf.length;i++)rms+=buf[i]*buf[i];rms=Math.sqrt(rms/buf.length);if(rms<.012)return null;
+let best=-1,bestCorr=0;for(let lag=Math.floor(sr/1000);lag<Math.floor(sr/65);lag++){let c=0;for(let i=0;i<buf.length-lag;i++)c+=buf[i]*buf[i+lag];c/=buf.length-lag;if(c>bestCorr){bestCorr=c;best=lag}}
+if(best<1||bestCorr<.12)return null;return sr/best}
+async function start(){try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('Este navegador ou endereço não liberou a função de microfone. Abra a página por HTTPS no Chrome.');
+stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});ctx=new (window.AudioContext||window.webkitAudioContext)();await ctx.resume();analyser=ctx.createAnalyser();analyser.fftSize=4096;ctx.createMediaStreamSource(stream).connect(analyser);const data=new Float32Array(analyser.fftSize);$('status').textContent='Microfone ligado. Cante uma nota sustentada.';$('start').disabled=true;$('stop').disabled=false;
+function loop(){analyser.getFloatTimeDomainData(data);let f=detect(data,ctx.sampleRate);if(f){$('note').textContent=freqName(f);$('freq').textContent=f.toFixed(1)+' Hz'}else{$('note').textContent='—';$('freq').textContent='Cante uma nota sustentada'}raf=requestAnimationFrame(loop)}loop();
+}catch(e){$('status').textContent='Não foi possível ativar: '+e.message+' Verifique a permissão do microfone e se o endereço começa com https://.'}}
+function stop(){if(raf)cancelAnimationFrame(raf);if(stream)stream.getTracks().forEach(t=>t.stop());if(ctx)ctx.close();stream=null;ctx=null;$('start').disabled=false;$('stop').disabled=true;$('note').textContent='—';$('freq').textContent='Microfone desligado';$('status').textContent='Microfone desligado.'}
+$('start').onclick=start;$('stop').onclick=stop;
+const tones=[['G3',196],['A3',220],['B3',246.94],['C4',261.63],['D4',293.66],['E4',329.63],['F♯4',369.99],['G4',392]];
+tones.forEach(([n,f])=>{let b=document.createElement('button');b.className='secondary';b.textContent=n;b.onclick=async()=>{let c=new (window.AudioContext||window.webkitAudioContext)();let o=c.createOscillator(),g=c.createGain();o.frequency.value=f;o.type='sine';g.gain.value=.12;o.connect(g);g.connect(c.destination);o.start();g.gain.setTargetAtTime(0,c.currentTime+.7,.08);o.stop(c.currentTime+1);o.onended=()=>c.close()};$('tones').appendChild(b)});
+</script></body></html>
