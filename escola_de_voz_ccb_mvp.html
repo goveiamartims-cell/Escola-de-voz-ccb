@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#173d34">
+<title>Escola de Voz CCB — Protótipo</title>
+<style>
+:root{--green:#173d34;--mint:#e8f1ec;--gold:#c69b53;--ink:#17231f;--muted:#66736d;--line:#dce5df}
+*{box-sizing:border-box}body{margin:0;background:#f5f7f5;color:var(--ink);font:16px system-ui,-apple-system,Segoe UI,sans-serif}
+header{background:var(--green);color:white;padding:26px 18px 30px}header .wrap,main{max-width:980px;margin:auto}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#d9e8df}h1{margin:8px 0;font-size:clamp(27px,5vw,40px)}header p{margin:0;color:#e0ebe5}
+main{padding:20px 16px 50px}.notice{background:#fff8e9;border:1px solid #ead8b6;padding:12px 14px;border-radius:12px;color:#5e4b2d;font-size:14px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}.card{background:white;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 4px 16px #173d3409}
+h2{font-size:19px;margin:0 0 12px}.muted{color:var(--muted);font-size:14px}
+button,select{font:inherit;border-radius:10px;padding:11px 14px;border:1px solid var(--line);background:white;color:var(--ink)}
+button{cursor:pointer;font-weight:650}button.primary{background:var(--green);color:white;border-color:var(--green)}button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.big{font-size:clamp(42px,10vw,64px);font-weight:750;letter-spacing:-.04em;color:var(--green);line-height:1.1}
+.stat{font-size:14px;color:var(--muted)}.meter{height:12px;background:#edf1ee;border-radius:20px;overflow:hidden;margin:12px 0}.meter span{display:block;height:100%;width:50%;background:var(--gold);transition:width .15s}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.keys button{padding:13px 4px}.keys small{display:block;color:var(--muted);font-weight:400}
+.result{padding:12px;border-radius:12px;background:var(--mint);margin-top:10px}.footer{font-size:12px;color:var(--muted);margin-top:18px;line-height:1.5}
+.pill{display:inline-block;padding:5px 9px;border-radius:99px;background:var(--mint);color:var(--green);font-size:12px;font-weight:700}
+</style></head>
+<body>
+<header><div class="wrap"><div class="kicker">Treinamento vocal • Hinário 5</div><h1>Escola de Voz CCB</h1><p>Seu espaço de prática, afinação e desenvolvimento vocal.</p></div></header>
+<main>
+<div class="notice"><strong>Protótipo inicial:</strong> este primeiro módulo testa o microfone e identifica a altura aproximada da nota cantada. Ainda não compara sua voz com uma partitura oficial nem classifica definitivamente seu tipo vocal.</div>
+<div class="grid">
+<section class="card">
+<h2>1. Teste de afinação</h2>
+<p class="muted">Use fones, fique em um ambiente silencioso e cante uma vogal confortável, sem forçar.</p>
+<div class="row"><button class="primary" id="start">Ativar microfone</button><button id="stop" disabled>Parar</button></div>
+<div class="result" aria-live="polite"><div class="stat">Nota detectada</div><div class="big" id="note">—</div><div id="freq" class="stat">Aguardando microfone</div><div class="meter"><span id="meter"></span></div><div id="cents" class="stat">Afinação: —</div></div>
+<p class="footer" id="micstatus">O navegador solicitará permissão para acessar o microfone.</p>
+</section>
+<section class="card">
+<h2>2. Ouça uma nota de referência</h2>
+<p class="muted">Escolha uma nota para ouvir. Depois tente reproduzi-la com a voz e observe o afinador.</p>
+<div class="row"><select id="refnote">
+<option value="G3">Sol 3</option><option value="A3">Lá 3</option><option value="B3">Si 3</option><option value="C4">Dó 4</option><option value="D4">Ré 4</option><option value="E4">Mi 4</option><option value="F#4">Fá sustenido 4</option><option value="G4">Sol 4</option>
+</select><button class="primary" id="play">Tocar referência</button></div>
+<div class="result"><div class="stat">Nota selecionada</div><div class="big" id="refdisplay">Sol 3</div><div class="stat" id="reffreq">196,00 Hz</div></div>
+<p class="footer">O som é gerado eletronicamente para estudo de altura. Não é gravação de hino.</p>
+</section>
+<section class="card">
+<h2>3. Exercício rápido</h2>
+<span class="pill">Escala de Sol maior</span>
+<p class="muted">Pratique subindo e descendo lentamente. Use a nota de referência para começar e depois cante a sequência inteira.</p>
+<div class="keys" id="scale">
+<button data-n="G3">Sol<small>G</small></button><button data-n="A3">Lá<small>A</small></button><button data-n="B3">Si<small>B</small></button><button data-n="C4">Dó<small>C</small></button>
+<button data-n="D4">Ré<small>D</small></button><button data-n="E4">Mi<small>E</small></button><button data-n="F#4">Fá#<small>F#</small></button><button data-n="G4">Sol<small>G</small></button>
+</div>
+<div class="row" style="margin-top:10px"><button id="up">Tocar escala subindo</button><button id="down">Tocar escala descendo</button></div>
+</section>
+<section class="card">
+<h2>4. Próximos módulos</h2>
+<ul class="muted" style="padding-left:20px;line-height:1.8">
+<li>Teste de extensão e região confortável</li><li>Exercícios de respiração e aquecimento</li><li>Treinamento separado de soprano, contralto, tenor e baixo</li><li>Partitura sincronizada com a execução</li><li>Relatório de afinação, ritmo e estabilidade</li><li>Cadastro de alunos e histórico individual</li>
+</ul>
+</section>
+</div>
+<p class="footer">Importante: use apenas em volume confortável. Interrompa se sentir dor, rouquidão ou esforço. Para funcionar, abra esta página em um endereço HTTPS ou em localhost e permita o uso do microfone. Este arquivo é uma demonstração local, não contém cadastro, armazenamento em nuvem ou pagamentos.</p>
+</main>
+<script>
+const names=['Dó','Dó#','Ré','Ré#','Mi','Fá','Fá#','Sol','Sol#','Lá','Lá#','Si'];
+const map={'G3':55,'A3':57,'B3':59,'C4':60,'D4':62,'E4':64,'F#4':66,'G4':67};
+const pretty={'G3':'Sol 3','A3':'Lá 3','B3':'Si 3','C4':'Dó 4','D4':'Ré 4','E4':'Mi 4','F#4':'Fá# 4','G4':'Sol 4'};
+const $=id=>document.getElementById(id);
+let ctx,stream,source,analyser,buf,raf;
+function hz(m){return 440*Math.pow(2,(m-69)/12)}
+function freqName(f){let m=Math.round(69+12*Math.log2(f/440));return {name:names[(m%12+12)%12],oct:Math.floor(m/12)-1,midi:m}}
+function detect(buf,sr){
+ let rms=0;for(let i=0;i<buf.length;i++)rms+=buf[i]*buf[i];rms=Math.sqrt(rms/buf.length);if(rms<0.012)return null;
+ let best=-1,bestCorr=0;const min=Math.floor(sr/1000),max=Math.min(Math.floor(sr/65),buf.length-2);
+ for(let lag=min;lag<=max;lag++){let corr=0;for(let i=0;i<buf.length-lag;i++)corr+=buf[i]*buf[i+lag];corr/=buf.length-lag;if(corr>bestCorr){bestCorr=corr;best=lag}}
+ if(best<0||bestCorr<0.35)return null;
+ let lag=best;if(best>1&&best<buf.length-1){let a=0,b=0,c=0;for(let i=0;i<buf.length-best-1;i++)a+=buf[i]*buf[i+best-1];for(let i=0;i<buf.length-best;i++)b+=buf[i]*buf[i+best];for(let i=0;i<buf.length-best-1;i++)c+=buf[i]*buf[i+best+1];let den=2*b-a-c;if(den)lag+=((a-c)/den)*0.5}
+ return sr/lag;
+}
+function tick(){analyser.getFloatTimeDomainData(buf);let f=detect(buf,ctx.sampleRate);if(f&&f>60&&f<1000){let n=freqName(f),target=hz(n.midi),cent=1200*Math.log2(f/target);$('note').textContent=n.name+(n.oct);$('freq').textContent=f.toFixed(1)+' Hz';$('cents').textContent='Afinação: '+(cent>0?'+':'')+cent.toFixed(0)+' cents da nota mais próxima';$('meter').style.width=Math.max(0,Math.min(100,50+cent*1.5))+'%';$('meter').style.background=Math.abs(cent)<15?'#23865b':'#c69b53'}else{$('note').textContent='—';$('freq').textContent='Cante uma nota sustentada';$('cents').textContent='Afinação: aguardando nota'}raf=requestAnimationFrame(tick)}
+$('start').onclick=async()=>{try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});ctx=new (window.AudioContext||window.webkitAudioContext)();await ctx.resume();source=ctx.createMediaStreamSource(stream);analyser=ctx.createAnalyser();analyser.fftSize=4096;buf=new Float32Array(analyser.fftSize);source.connect(analyser);$('start').disabled=true;$('stop').disabled=false;$('micstatus').textContent='Microfone ativo. Cante uma nota confortável.';tick()}catch(e){$('micstatus').textContent='Não foi possível acessar o microfone. Verifique a permissão e use HTTPS ou localhost.'}};
+$('stop').onclick=()=>{cancelAnimationFrame(raf);if(stream)stream.getTracks().forEach(t=>t.stop());if(ctx)ctx.close();$('start').disabled=false;$('stop').disabled=true;$('micstatus').textContent='Microfone desligado.'};
+function playMidi(m,d=.8){let ac=ctx||new (window.AudioContext||window.webkitAudioContext)();if(!ctx)ctx=ac;let o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=hz(m);g.gain.setValueAtTime(.0001,ac.currentTime);g.gain.exponentialRampToValueAtTime(.16,ac.currentTime+.04);g.gain.setTargetAtTime(.0001,ac.currentTime+d-.12,.04);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d);return ac}
+$('play').onclick=()=>{let v=$('refnote').value;playMidi(map[v]);$('refdisplay').textContent=pretty[v];$('reffreq').textContent=hz(map[v]).toFixed(2)+' Hz'};
+$('refnote').onchange=()=>{let v=$('refnote').value;$('refdisplay').textContent=pretty[v];$('reffreq').textContent=hz(map[v]).toFixed(2)+' Hz'};
+document.querySelectorAll('#scale button').forEach(b=>b.onclick=()=>playMidi(map[b.dataset.n]));
+async function sequence(arr){for(let v of arr){playMidi(map[v],.55);await new Promise(r=>setTimeout(r,650))}}
+$('up').onclick=()=>sequence(['G3','A3','B3','C4','D4','E4','F#4','G4']);
+$('down').onclick=()=>sequence(['G4','F#4','E4','D4','C4','B3','A3','G3']);
+</script></body></html>
